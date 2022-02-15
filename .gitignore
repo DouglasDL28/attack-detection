@@ -5,6 +5,10 @@ __pycache__/
 
 /dataset
 
+# Profile reportss
+*.html
+
+.DS_Store
 # C extensions
 *.so
 
