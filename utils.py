@@ -1,5 +1,12 @@
 import re
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, classification_report, accuracy_score
+
+import matplotlib.pyplot as plt
+import numpy as np
+from itertools import cycle
+from yellowbrick.classifier import ROCAUC
+
+from sklearn.metrics import (confusion_matrix, auc, precision_score, recall_score,
+                             f1_score, classification_report, accuracy_score, roc_curve, auc)
 
 nums_regex = re.compile(r"[0-9]+")
 
@@ -27,15 +34,32 @@ def is_int(val):
         return False
 
 
-def evaluate_model(true_values, preds):
-    print("Matrix de confusión: \n", confusion_matrix(true_values, preds))
+def evaluate_model(y_true, y_pred):
     target_names = ["Normal flow",
                     "SYN Scan - aggressive",
                     "Denial of Service R-U-Dead-Yet",
                     "Denial of Service Slowloris"]
-    print(classification_report(true_values, preds, target_names=target_names))
-    print("recall_score: ", recall_score(true_values, preds, average=None))
+    print("Matrix de confusión: \n", confusion_matrix(y_true, y_pred))
+    print(classification_report(y_true, y_pred, target_names=target_names))
+    print("recall_score: ", recall_score(y_true, y_pred, average=None))
     print("precision_score: ", precision_score(
-        true_values, preds, average=None))
-    print("f1_score: ", f1_score(true_values, preds, average=None))
-    print("accuracy: ", accuracy_score(true_values, preds))
+        y_true, y_pred, average=None))
+    print("f1_score: ", f1_score(y_true, y_pred, average=None))
+    print("accuracy: ", accuracy_score(y_true, y_pred))
+
+
+def plot_roc_curve(model, X_train, y_train, X_test, y_test):
+
+    # Creating visualization with the readable labels
+    visualizer = ROCAUC(model, encoder={0: 'Normal flow', 
+                                        1: 'SYN Scan - aggressive', 
+                                        2: 'Denial of Service R-U-Dead-Yet',
+                                        3: 'Denial of Service Slowloris'})
+                                        
+    # Fitting to the training data first then scoring with the test data                                    
+    visualizer.fit(X_train, y_train)
+    visualizer.score(X_test, y_test)
+    visualizer.show()
+    
+    return visualizer
+
